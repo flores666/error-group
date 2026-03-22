@@ -37,14 +37,14 @@ func DistributedQuery(shards []database.Database, query string) (*[]database.Dat
 				results = append(results, res.data...)
 				mutex.Unlock()
 			case <-ctx.Done():
-				return ctx.Err()
+				return eg.Error
 			}
 
 			return nil
 		})
 	}
 
-	err := eg.Result()
+	err := eg.Wait()
 	if err != nil {
 		return nil, errors.New("ERROR")
 	}

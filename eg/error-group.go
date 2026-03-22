@@ -9,10 +9,9 @@ type ErrorGroup struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	wg    sync.WaitGroup
-	mutex sync.Mutex
+	wg sync.WaitGroup
 
-	err error
+	Error error
 }
 
 func NewErrorGroup() (*ErrorGroup, context.Context) {
@@ -27,14 +26,14 @@ func NewErrorGroup() (*ErrorGroup, context.Context) {
 func (e *ErrorGroup) Go(action func() error) {
 	e.wg.Go(func() {
 		if err := action(); err != nil {
-			e.err = err
+			e.Error = err
 			e.cancel()
 			return
 		}
 	})
 }
 
-func (e *ErrorGroup) Result() error {
+func (e *ErrorGroup) Wait() error {
 	e.wg.Wait()
-	return e.err
+	return e.Error
 }
